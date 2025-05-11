@@ -3,6 +3,7 @@ import { FcDataEncryption } from "react-icons/fc";
 export const initialStore=()=>{
   return{
     phoneBookContact: [],
+    contactToEdit: null
   }
 }
 
@@ -38,6 +39,20 @@ export default function storeReducer(store, action = {}) {
           phoneBookContact: store.phoneBookContact.filter(contact => contact.id !== id)
         };
 
+    case "set_contact_to_edit":
+      return {
+        ...store,
+        contactToEdit: action.payload.contact
+      };
+    case "edit_contact":
+      return {
+        ...store,
+        phoneBookContact: store.phoneBookContact.map(contact =>
+          contact.id === action.payload.id
+            ? { ...contact, ...action.payload.contact }
+            : contact
+        )
+      };
     default:
       throw Error('Acción desconocida.');
   }    

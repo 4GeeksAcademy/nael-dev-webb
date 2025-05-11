@@ -30,11 +30,11 @@ export const Card = ({nameContact, direction, phone, mail,img,handleEdit,handleD
 
                 </div>
                 <div className="col-8 col-lg-4 ">
-                    <Link to="/Book">
+                
                         <button className="btn boton p-1 mx-1 font-si fa-lg" type="button" onClick={handleEdit}>
                             <MdOutlineModeEdit/>
                         </button>
-                     </Link>
+                    
                     
                     <button className="btn boton p-1 mx-1 " type="button" onClick={handleDelete}>
                         <RiDeleteBinFill />

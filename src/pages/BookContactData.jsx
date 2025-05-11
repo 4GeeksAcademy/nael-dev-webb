@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
@@ -6,12 +6,26 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
 export const BookContactData = () => {
     const { store, dispatch } = useGlobalReducer()
+    const contactToEdit = store.contactToEdit;
+    
     const [data, setData] = useState({
         fullName: '',
         email: '',
         phone: '',
         address: ''
     });
+
+
+    useEffect(()=> {
+        if(contactToEdit){
+            setData({
+                fullName:contactToEdit.fullName || contactToEdit.name || "",
+                email: contactToEdit.email || "",
+                phone: contactToEdit.phone || "",
+                address: contactToEdit.address || "" 
+            });
+        }
+    },[contactToEdit]);
 
     const handleInput = (evt) => {
         const { id, value } = evt.target;
@@ -21,6 +35,7 @@ export const BookContactData = () => {
     }
     const submitForm = async (evt) => {
         evt.preventDefault();
+        
         const newContact = {
             name: data.fullName,
             email: data.email,
@@ -30,49 +45,74 @@ export const BookContactData = () => {
         };
 
         try {
-            const addContact = await fetch("https://playground.4geeks.com/contact/agendas/nael-dev/contacts", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(newContact)
+              if (contactToEdit) {
+        const id = store.contactToEdit.id;
+        const response = await fetch(`https://playground.4geeks.com/contact/agendas/nael-dev/contacts/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(newContact)
+        });
 
-            });
+        if (!response.ok) throw new Error("Error al actualizar el contacto");
 
-            if (!addContact.ok) throw new Error("Error al guardar el contacto");
+        dispatch({
+          type: "edit_contact",
+          payload: {
+            id: id,
+            contact: { ...newContact, id }
+          }
+        });
 
-            const addContactData = await addContact.json();
+        dispatch({ type: "set_contact_to_edit", payload: { contact: null } });
+
+      } else {
+        const editContact = await fetch("https://playground.4geeks.com/contact/agendas/nael-dev/contacts", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(newContact)
+        });
+
+        if (!editContact.ok) throw new Error("Error al crear el contacto");
+
+        const resulEdit = await editContact.json();
+
+        dispatch({
+          type: "add_contact",
+          payload: {
+            contact: {
+              fullName: resulEdit.name,
+              email: resulEdit.email,
+              phone: resulEdit.phone,
+              address: resulEdit.address,
+              id:resulEdit.id
+             
+            }
+          }
+        });
+      }
+
+      setData({ fullName: "", email: "", phone: "", address: "" });
+      
+
+    } catch (error) {
+      console.error("Error al guardar contacto:", error.message);
+    }
+  };
+
             
 
-            dispatch({
-                type: 'add_contact',
-                payload: {
-                    contact: {
-                        fullName: addContactData.name,
-                        email: addContactData.email,
-                        phone: addContactData.phone,
-                        address: addContactData.address,
-                        id: addContactData.id
-                    }
-                }
-            });
+        
 
-            setData({
-                fullName: '',
-                email: '',
-                phone: '',
-                address: ''
-            });
 
-        } catch (error) {
-            console.error("Fallo al guardar contacto:", error);
-        }
-    };
 
 
     return (
         <form className="row g-3 mx-2" onSubmit={submitForm}>
-            <h1>Add a new Contact</h1>
+             <h1>{contactToEdit ? "Edit Contact" : "Add a new Contact"}</h1>
             <div className="col-md-12">
                 <label htmlFor="fullName" className="form-label">Full Name</label>
                 <input
@@ -119,7 +159,9 @@ export const BookContactData = () => {
 
 
             <div className="col-md-12">
-                <button type="submit" className="btn btn-primary col-md-12">Save</button>
+                <button type="submit" className="btn btn-primary col-md-12">
+                    {contactToEdit ? "Update Contact" : "Save"}
+                </button>
             </div>
             <Link to="/">
                 <button type="button" className="btn btn-link">or get back to contacts</button>

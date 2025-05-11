@@ -2,11 +2,12 @@ import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { Card } from "../components/Card.jsx";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-export const Home =   () => {
+export const Home = () => {
 
-  const {store, dispatch} =useGlobalReducer()
-
+	const { store, dispatch } = useGlobalReducer()
+	const navigate = useNavigate();
 	useEffect(() => {
 
 
@@ -21,13 +22,16 @@ export const Home =   () => {
 				}
 			})
 
+
 		}
-		if(store.phoneBookContact.length === 0){
+		if (store.phoneBookContact.length === 0) {
 			fetchBook();
+
 		}
 
 
 	}, []);
+	console.log("comprobando store", store.phoneBookContact)
 
 	const handleDeleteContact = async (id) => {
 		try {
@@ -43,30 +47,39 @@ export const Home =   () => {
 				payload: { id }
 			});
 
-			
+
 		} catch (error) {
 			console.error("Error eliminando contacto:", error.message);
-			
+
 		}
 	};
+	const handleEditContact = (contact) => {
+		dispatch({
+			type: "set_contact_to_edit",
+			payload: { contact }
+		});
+		navigate("/book");
+	}
 
-	return (
-		<div className="text-center mt-5">
-			
+
+		return (
+			<div className="text-center mt-5">
+
 				{
 					store.phoneBookContact.map(item => (
 						<Card key={item.id}
 							nameContact={item.name || item.fullName}
-							direction= {item.address}
-							phone = {item.phone}
-							mail = {item.email}
-							img ="https://media.istockphoto.com/id/1087531642/es/vector/silueta-de-la-cara-macho-o-icono-perfil-de-avatar-de-hombre-persona-desconocida-o-an%C3%B3nimo.jpg?s=612x612&w=0&k=20&c=7XiO0WCSed5AgPUnEcoEsXUzn8ujjocQB-uaM9bECng="
-							handleDelete={()=>handleDeleteContact(item.id)}
-			/>
+							direction={item.address}
+							phone={item.phone}
+							mail={item.email}
+							img="https://media.istockphoto.com/id/1087531642/es/vector/silueta-de-la-cara-macho-o-icono-perfil-de-avatar-de-hombre-persona-desconocida-o-an%C3%B3nimo.jpg?s=612x612&w=0&k=20&c=7XiO0WCSed5AgPUnEcoEsXUzn8ujjocQB-uaM9bECng="
+							handleDelete={() => handleDeleteContact(item.id)}
+							handleEdit={() => handleEditContact(item)}
+						/>
 					))
 				}
-			
-		</div>
-	);
-}; 
+
+			</div>
+		);
+	};
 
