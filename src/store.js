@@ -1,32 +1,44 @@
+import { FcDataEncryption } from "react-icons/fc";
+
 export const initialStore=()=>{
   return{
-    message: null,
-    todos: [
-      {
-        id: 1,
-        title: "Make the bed",
-        background: null,
-      },
-      {
-        id: 2,
-        title: "Do my homework",
-        background: null,
-      }
-    ]
+    phoneBookContact: [],
   }
 }
 
 export default function storeReducer(store, action = {}) {
   switch(action.type){
-    case 'add_task':
+    case 'add_contact':
 
-      const { id,  color } = action.payload
+      const { phoneBookContact,contact } = action.payload;
+   
+       if (phoneBookContact) {
+      
+        return {
+          ...store,
+          phoneBookContact: phoneBookContact
+        };
+      } else if (contact) {
+       
+        return {
+          ...store,
+          phoneBookContact: [
+            ...store.phoneBookContact,
+            contact
+          ]
+        };
+      }
 
-      return {
-        ...store,
-        todos: store.todos.map((todo) => (todo.id === id ? { ...todo, background: color } : todo))
-      };
+      return store;
+
+      case 'delete_contact':
+        const{id} = action.payload;
+        return{
+           ...store,
+          phoneBookContact: store.phoneBookContact.filter(contact => contact.id !== id)
+        };
+
     default:
-      throw Error('Unknown action.');
+      throw Error('Acción desconocida.');
   }    
 }
