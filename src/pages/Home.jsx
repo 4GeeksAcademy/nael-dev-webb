@@ -1,85 +1,132 @@
-import rigoImageUrl from "../assets/img/rigo-baby.jpg";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { Card } from "../components/Card.jsx";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Modal } from "../components/Modal.jsx";
 
 export const Home = () => {
+  const { store, dispatch } = useGlobalReducer();
+  const navigate = useNavigate();
 
-	const { store, dispatch } = useGlobalReducer()
-	const navigate = useNavigate();
-	useEffect(() => {
+  const [contactToDelete, setContactToDelete] = useState(null);
 
+  // Cargar agenda al montar el componente
+  useEffect(() => {
+    const fetchBook = async () => {
+      try {
+        const checkAgenda = await fetch('https://playground.4geeks.com/contact/agendas/nael-dev');
 
-		const fetchBook = async () => {
-			const dataBookData = await fetch('https://playground.4geeks.com/contact/agendas/nael-dev');
-			const promise = await dataBookData.json();
+        if (!checkAgenda.ok) {
+          const createAgenda = await fetch('https://playground.4geeks.com/contact/agendas/nael-dev', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
+          });
 
-			dispatch({
-				type: 'add_contact',
-				payload: {
-					phoneBookContact: promise.contacts
-				}
-			})
+          if (!createAgenda.ok) {
+            throw new Error("No se pudo crear la agenda");
+          }
 
+          dispatch({
+            type: 'add_contact',
+            payload: {
+              phoneBookContact: [],
+            },
+          });
+          return;
+        }
 
-		}
-		if (store.phoneBookContact.length === 0) {
-			fetchBook();
+        const agendaData = await checkAgenda.json();
 
-		}
+        dispatch({
+          type: 'add_contact',
+          payload: {
+            phoneBookContact: agendaData.contacts || [],
+          },
+        });
 
+      } catch (error) {
+        console.error("Error al cargar la agenda:", error);
+      }
+    };
 
-	}, []);
-	console.log("comprobando store", store.phoneBookContact)
+    if (store.phoneBookContact.length === 0) {
+      fetchBook();
+    }
 
-	const handleDeleteContact = async (id) => {
-		try {
-			const response = await fetch(`https://playground.4geeks.com/contact/agendas/nael-dev/contacts/${id}`, {
-				method: "DELETE"
-			});
+    // Limpiar el contacto a editar al desmontar el componente
+    return () => {
+      dispatch({
+        type: "set_contact_to_edit",
+        payload: { contact: null },
+      });
+    };
+  }, []);
 
-			if (!response.ok) throw new Error("No se pudo eliminar el contacto");
+  // Confirmar eliminación
+  const confirmDeleteContact = (id) => {
+    setContactToDelete(id);
+ 
+  };
 
-			// Elimina el contacto del estado local
-			dispatch({
-				type: 'delete_contact',
-				payload: { id }
-			});
+  // Ejecutar eliminación
+  const handleDeleteContact = async () => {
+    if (!contactToDelete) return;
 
+    try {
+      const response = await fetch(
+        `https://playground.4geeks.com/contact/agendas/nael-dev/contacts/${contactToDelete}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-		} catch (error) {
-			console.error("Error eliminando contacto:", error.message);
+      if (!response.ok) throw new Error("No se pudo eliminar el contacto");
 
-		}
-	};
-	const handleEditContact = (contact) => {
-		dispatch({
-			type: "set_contact_to_edit",
-			payload: { contact }
-		});
-		navigate("/book");
-	}
+      dispatch({
+        type: "delete_contact",
+        payload: { id: contactToDelete },
+      });
 
+      
+      setContactToDelete(null);
+    } catch (error) {
+      console.error("Error eliminando contacto:", error.message);
+    }
+  };
 
-		return (
-			<div className="text-center mt-5">
+  // Editar contacto
+  const handleEditContact = (contact) => {
+    dispatch({
+      type: "set_contact_to_edit",
+      payload: { contact },
+    });
+    navigate("/book");
+  };
 
-				{
-					store.phoneBookContact.map(item => (
-						<Card key={item.id}
-							nameContact={item.name || item.fullName}
-							direction={item.address}
-							phone={item.phone}
-							mail={item.email}
-							img="https://media.istockphoto.com/id/1087531642/es/vector/silueta-de-la-cara-macho-o-icono-perfil-de-avatar-de-hombre-persona-desconocida-o-an%C3%B3nimo.jpg?s=612x612&w=0&k=20&c=7XiO0WCSed5AgPUnEcoEsXUzn8ujjocQB-uaM9bECng="
-							handleDelete={() => handleDeleteContact(item.id)}
-							handleEdit={() => handleEditContact(item)}
-						/>
-					))
-				}
+  return (
+    <div className="text-center mt-5">
+      {store.phoneBookContact.map((item) => (
+        <Card
+          key={item.id}
+          nameContact={item.fullName || item.name || "Sin nombre"}
+          direction={item.address}
+          phone={item.phone}
+          mail={item.email}
+          img="https://media.istockphoto.com/id/1087531642/es/vector/silueta-de-la-cara-macho-o-icono-perfil-de-avatar-de-hombre-persona-desconocida-o-an%C3%B3nimo.jpg?s=612x612&w=0&k=20&c=7XiO0WCSed5AgPUnEcoEsXUzn8ujjocQB-uaM9bECng="
+          handleDelete={() => confirmDeleteContact(item.id)}
+          handleEdit={() => handleEditContact(item)}
+        />
+      ))}
 
-			</div>
-		);
-	};
-
+      {/* Modal de confirmación */}
+      <Modal
+       
+        onConfirm={handleDeleteContact}
+        onClose={() => setContactToDelete(null)}
+      />
+    </div>
+  );
+};

@@ -40,6 +40,8 @@ export default function storeReducer(store, action = {}) {
         };
 
     case "set_contact_to_edit":
+
+     
       return {
         ...store,
         contactToEdit: action.payload.contact
@@ -52,6 +54,7 @@ export default function storeReducer(store, action = {}) {
             ? { ...contact, ...action.payload.contact }
             : contact
         )
+        
       };
     default:
       throw Error('Acción desconocida.');

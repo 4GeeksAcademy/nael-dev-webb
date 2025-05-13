@@ -4,9 +4,18 @@ import { FaPhoneFlip } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 import { MdOutlineModeEdit } from "react-icons/md";
 import { RiDeleteBinFill } from "react-icons/ri";
-import { Link } from "react-router-dom";
 
-export const Card = ({nameContact, direction, phone, mail,img,handleEdit,handleDelete}) => {
+
+
+export const Card = (
+    {nameContact, 
+        direction, 
+        phone, 
+        mail,
+        img,
+        handleEdit,
+        handleDelete
+    }) => {
     return (
         <div className="container-fluid justify-content-center border border-black border-end-0 border-start-0  pb-5">
             <div className="row justify-content-center">
@@ -31,12 +40,21 @@ export const Card = ({nameContact, direction, phone, mail,img,handleEdit,handleD
                 </div>
                 <div className="col-8 col-lg-4 ">
                 
-                        <button className="btn boton p-1 mx-1 font-si fa-lg" type="button" onClick={handleEdit}>
+                        <button 
+                            className="btn boton p-1 mx-1 font-si fa-lg" 
+                            type="button"  
+                            onClick={handleEdit}
+                            >
                             <MdOutlineModeEdit/>
                         </button>
                     
                     
-                    <button className="btn boton p-1 mx-1 " type="button" onClick={handleDelete}>
+                    <button
+                        className="btn boton p-1 mx-1 "
+                        type="button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        onClick={handleDelete}>
                         <RiDeleteBinFill />
                     </button>
                    

@@ -7,7 +7,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 export const BookContactData = () => {
     const { store, dispatch } = useGlobalReducer()
     const contactToEdit = store.contactToEdit;
-    
+    console.log("probando al principio",contactToEdit)
     const [data, setData] = useState({
         fullName: '',
         email: '',
@@ -18,6 +18,7 @@ export const BookContactData = () => {
 
     useEffect(()=> {
         if(contactToEdit){
+          console.log("el segundo", contactToEdit)
             setData({
                 fullName:contactToEdit.fullName || contactToEdit.name || "",
                 email: contactToEdit.email || "",
@@ -103,13 +104,6 @@ export const BookContactData = () => {
     }
   };
 
-            
-
-        
-
-
-
-
     return (
         <form className="row g-3 mx-2" onSubmit={submitForm}>
              <h1>{contactToEdit ? "Edit Contact" : "Add a new Contact"}</h1>
@@ -121,7 +115,8 @@ export const BookContactData = () => {
                     id="fullName"
                     placeholder="Enter full name"
                     onChange={handleInput}
-                    value={data.fullName} />
+                    value={data.fullName} 
+                    required/>
 
 
             </div>
@@ -134,7 +129,8 @@ export const BookContactData = () => {
                     id="email"
                     placeholder="Enter email"
                     onChange={handleInput}
-                    value={data.email} />
+                    value={data.email}
+                    required />
             </div>
             <div className="col-md-12">
                 <label htmlFor="phone" className="form-label">Phone</label>
@@ -143,8 +139,11 @@ export const BookContactData = () => {
                     className="form-control"
                     id="phone"
                     placeholder="Enter phone"
+                    minLength="9"
+                    maxLength="9"
                     onChange={handleInput}
-                    value={data.phone} />
+                    value={data.phone} 
+                    required/>
             </div>
             <div className="col-md-12">
                 <label htmlFor="address" className="form-label">Address</label>
@@ -154,13 +153,14 @@ export const BookContactData = () => {
                     id="address"
                     placeholder="Enter adress"
                     onChange={handleInput}
-                    value={data.address} />
+                    value={data.address}
+                    required />
             </div>
 
 
             <div className="col-md-12">
                 <button type="submit" className="btn btn-primary col-md-12">
-                    {contactToEdit ? "Update Contact" : "Save"}
+                    Save
                 </button>
             </div>
             <Link to="/">
