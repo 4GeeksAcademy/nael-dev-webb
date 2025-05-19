@@ -9,8 +9,8 @@ export const Home = () => {
   const navigate = useNavigate();
 
   const [contactToDelete, setContactToDelete] = useState(null);
-
-  // Cargar agenda al montar el componente
+  
+  
   useEffect(() => {
     const fetchBook = async () => {
       try {
@@ -55,23 +55,17 @@ export const Home = () => {
     if (store.phoneBookContact.length === 0) {
       fetchBook();
     }
+     dispatch({ type: "set_contact_to_edit", payload: { contact: null } });
 
-    // Limpiar el contacto a editar al desmontar el componente
-    return () => {
-      dispatch({
-        type: "set_contact_to_edit",
-        payload: { contact: null },
-      });
-    };
   }, []);
 
-  // Confirmar eliminación
+ 
   const confirmDeleteContact = (id) => {
     setContactToDelete(id);
- 
+
   };
 
-  // Ejecutar eliminación
+ 
   const handleDeleteContact = async () => {
     if (!contactToDelete) return;
 
@@ -90,14 +84,14 @@ export const Home = () => {
         payload: { id: contactToDelete },
       });
 
-      
+
       setContactToDelete(null);
     } catch (error) {
       console.error("Error eliminando contacto:", error.message);
     }
   };
 
-  // Editar contacto
+
   const handleEditContact = (contact) => {
     dispatch({
       type: "set_contact_to_edit",
@@ -121,9 +115,9 @@ export const Home = () => {
         />
       ))}
 
-      {/* Modal de confirmación */}
+    
       <Modal
-       
+
         onConfirm={handleDeleteContact}
         onClose={() => setContactToDelete(null)}
       />
